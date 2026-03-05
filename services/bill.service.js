@@ -1,6 +1,16 @@
 import { supabase } from '../config/supabaseClient.js';
 import { v4 as uuidv4 } from 'uuid';
 
+const getBillStatus = (bill) => {
+  if (bill.is_paid) return 'paid';
+
+  const today = new Date();
+  const due = new Date(bill.due_date);
+
+  if (due < today) return 'overdue';
+
+  return 'unpaid';
+};
 export const getAllBills = async (userId) => {
   const { data, error } = await supabase
     .from('bills')
@@ -12,7 +22,12 @@ export const getAllBills = async (userId) => {
     throw new Error(error.message);
   }
 
-  return data;
+   const billsWithStatus = data.map((bill) => ({
+    ...bill,
+    status: getBillStatus(bill),
+  }));
+
+  return billsWithStatus;
 };
 
 export const createBill = async (userId, billData) => {
