@@ -4,6 +4,7 @@ import {
   createDebt,
   updateDebt,
   deleteDebt,
+  payDebt,
 } from '../services/debt.service.js';
 
 export const getDebts = asyncHandler(async (req, res) => {
@@ -43,7 +44,25 @@ export const modifyDebt = asyncHandler(async (req, res) => {
     message: 'Debt updated successfully',
   });
 });
+export const payDebtAmount = asyncHandler(async (req, res) => {
 
+  const { amount } = req.body;
+
+  if (amount === undefined || amount === null)  {
+    return res.status(400).json({
+      success: false,
+      error: 'Payment amount required'
+    });
+  }
+
+  const debt = await payDebt(req.params.id, req.user.id, amount);
+
+  res.status(200).json({
+    success: true,
+    data: debt,
+    message: 'Debt payment recorded'
+  });
+});
 export const removeDebt = asyncHandler(async (req, res) => {
   await deleteDebt(req.params.id, req.user.id);
 

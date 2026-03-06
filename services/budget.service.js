@@ -52,7 +52,37 @@ export const updateBudget = async (budgetId, userId, updates) => {
 
   return data;
 };
+export const addSpent = async (budgetId, userId, amount) => {
 
+  const { data: budget, error: fetchError } = await supabase
+    .from('budgets')
+    .select('spent, amount')
+    .eq('id', budgetId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (fetchError || !budget) {
+    throw new Error('Budget not found');
+  }
+
+  const newSpent = parseFloat(budget.spent) + parseFloat(amount);
+
+  if (newSpent > budget.amount) {
+    throw new Error('Budget exceeded');
+  }
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .update({ spent: newSpent })
+    .eq('id', budgetId)
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
 export const deleteBudget = async (budgetId, userId) => {
   const { error } = await supabase
     .from('budgets')

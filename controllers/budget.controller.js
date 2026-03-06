@@ -4,6 +4,7 @@ import {
   createBudget,
   updateBudget,
   deleteBudget,
+  addSpent,
 } from '../services/budget.service.js';
 
 export const getBudgets = asyncHandler(async (req, res) => {
@@ -43,6 +44,30 @@ export const modifyBudget = asyncHandler(async (req, res) => {
     message: 'Budget updated successfully',
   });
 });
+export const spendBudget = asyncHandler(async (req,res)=>{
+
+  const { amount } = req.body;
+
+  if(!amount){
+    return res.status(400).json({
+      success:false,
+      error:"Please provide amount"
+    })
+  }
+
+  const budget = await addSpent(
+    req.params.id,
+    req.user.id,
+    amount
+  )
+
+  res.status(200).json({
+    success:true,
+    data:budget,
+    message:"Spent added successfully"
+  })
+
+})
 
 export const removeBudget = asyncHandler(async (req, res) => {
   await deleteBudget(req.params.id, req.user.id);
